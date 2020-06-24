@@ -1,0 +1,70 @@
+(1)
+
+To create a table in mySQL start mySQL in terminal by following command :
+
+sudo service mysqld start
+
+start mysql terminal with this command : mysql-u root -pcloudera
+
+create a database db1 with the command : create database db1;
+
+Command to use the db1 database : use db1;
+
+create a table in mySQL : create table comp(emp_id INT NOT NULL AUTO_INCREMENT,emp_name VARCHAR(100),emp_sal INT,PRIMARY KEY(emp_id));
+
+insert into comp values(1,"name",value),(2,"name",value),(3,"name",value),(4,"name",value);
+
+To view the table : select * from comp;
+
+To import table to hdfs from mySQL : sqoop import --connect jdbc:mysql://localhost/db1 --username root --password cloudera --table comp --m 1
+
+To see the imported table in hdfs : hadoop fs -ls comp/
+
+hadoop fs -cat comp/part-m-00000
+
+Importing table into hdfs :
+sqoop import --connect jdbc:mysql://localhost/db1 --username root --password cloudera --table comp --m 1 --target-dir queryresult
+
+To view table in query result : hadoop fs -cat queryresult/part-m-00000
+
+Exporting table from hdfs to mySQL : sqoop export --connect jdbc:mysql://localhost/db1 --username root --password cloudera --table employees --export-dir queryresult/part-m-00000
+
+To view the exported table from hdfs to mySQL : select * from employees;
+
+(2)
+
+Creating Hive table using HQL :
+
+hive –f tables-schema.hql
+
+Create a table in mySQL and import the content from hive to mySQL
+
+create table empNew(id INT,name VARCHAR);
+
+sqoop export --connect jdbc:mysql://localhost/db1 --username root --password cloudera --table empNew --export-dir /user/hive/warehouse/employees -m 1
+
+sqoop import --connect jdbc:mysql://localhost/db1 --username root --password cloudera --table comp --m 1 --target-dir /user/hive/warehouse/import
+
+(3)
+
+Creating a table in hive
+
+create table IBM(date DATE , divident DECIMAL(10,10)) row format delimited fields terminated by "," LINES TERMINATED BY '\n' stored as textfile;
+
+Loading the table with data
+
+load data local inpath "/home/cloudera/Downloads/dividends.csv" into table iBM;
+
+Creating table in mySQL
+
+create table IBM(date DATE,divident INT);
+
+Queries on hive to get months whose dividend is less than 0.5
+
+select date_format(date,'MMM') as month,count(*) from IBM where divident>=0.5 group by date_format(date,'MMM');
+
+query on hive to get word count of the months
+
+select date_format(date,'MMM') as month,count(*) from IBM group by date_format(date,'MMM');
+
+
